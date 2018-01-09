@@ -1,0 +1,7 @@
+C:\Users\Christian\Documents\Visual Studio 2017\Projects\CarPersistence\CarPersistence\CarPersistence\bin\Debug\CarPersistence.dll
+C:\Users\Christian\Documents\Visual Studio 2017\Projects\CarPersistence\CarPersistence\CarPersistence\bin\Debug\CarPersistence.pdb
+C:\Users\Christian\Documents\Visual Studio 2017\Projects\CarPersistence\CarPersistence\CarPersistence\bin\Debug\ScriptHookVDotNet2.dll
+C:\Users\Christian\Documents\Visual Studio 2017\Projects\CarPersistence\CarPersistence\CarPersistence\obj\Debug\CarPersistence.csprojResolveAssemblyReference.cache
+C:\Users\Christian\Documents\Visual Studio 2017\Projects\CarPersistence\CarPersistence\CarPersistence\obj\Debug\CarPersistence.csproj.CoreCompileInputs.cache
+C:\Users\Christian\Documents\Visual Studio 2017\Projects\CarPersistence\CarPersistence\CarPersistence\obj\Debug\CarPersistence.dll
+C:\Users\Christian\Documents\Visual Studio 2017\Projects\CarPersistence\CarPersistence\CarPersistence\obj\Debug\CarPersistence.pdb
