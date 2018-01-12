@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GTA;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,14 +9,17 @@ namespace CarPersistence
 {
     class VehicleData
     {
+        public Vehicle v { get; set; }
+        public Blip b { get; set; }
         private int ID;
         public bool saved { get; set; }
         public long timeStamp { get; set; }
         private int modelHash;
         public string name { get; set; }
 
-        public VehicleData(int ID, long timeStamp, int modelHash, string name)
+        public VehicleData(Vehicle v, int ID, long timeStamp, int modelHash, string name)
         {
+            this.v = v;
             this.ID = ID;
             this.timeStamp = timeStamp;
             this.modelHash = modelHash;

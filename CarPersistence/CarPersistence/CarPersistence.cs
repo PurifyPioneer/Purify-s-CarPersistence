@@ -1,6 +1,7 @@
 ﻿using GTA;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Windows.Forms;
 
 namespace CarPersistence
@@ -25,12 +26,17 @@ namespace CarPersistence
 
     public class CarPersistence : Script
     {
+        // Util
+        private Stopwatch stopwatch = new Stopwatch();
+
+        private long cleanUpTime = 0;
+        private long blipTime = 0;
+        private long generalTime = 0;
+
         // Easy availability
         private Ped player;
         // Limit how many vehicles we want to remember the player last entered
         private int drivenVehiclesLimit = 3;
-
-        private LinkedList<Blip> blips = new LinkedList<Blip>();
 
         // drivenVehicles contains all vehicles that are currently driven
         private Dictionary<int, VehicleData> drivenVehicles = new Dictionary<int, VehicleData>();
@@ -62,8 +68,19 @@ namespace CarPersistence
         void OnTick(object sender, EventArgs e)
         {
             // If limit is exceeded oldest vehicles will be removed
+            stopwatch.Restart();
+
             cleanUpDrivenVehicles();
+
+            stopwatch.Stop();
+            cleanUpTime = stopwatch.ElapsedMilliseconds;
+            stopwatch.Restart();
+
             updateBlips();
+
+            stopwatch.Stop();
+            blipTime = stopwatch.ElapsedMilliseconds;
+            stopwatch.Restart();
 
             // Logic to check if player is in a vehicle and if this vehicle is known to the system
             if(player.IsInVehicle())
@@ -90,6 +107,9 @@ namespace CarPersistence
                     changeToDriven(v);
                 }
             }
+
+            stopwatch.Stop();
+            generalTime = stopwatch.ElapsedMilliseconds;
         }
 
         // When the script is aborted/reloaded
@@ -121,9 +141,14 @@ namespace CarPersistence
                 UI.Notify(vehicles);
             }
 
-            if (e.KeyCode == Keys.U)
+ /*           if (e.KeyCode == Keys.U)
             {
                 UI.Notify("" + player.CurrentVehicle.Handle);
+            }
+*/
+            if (e.KeyCode == Keys.U)
+            {
+                UI.Notify("CUT: " + cleanUpTime + "\nBT:  " + blipTime + "\nGT:  " + generalTime);
             }
         }
 
@@ -178,7 +203,7 @@ namespace CarPersistence
             else
             {
                 // New vehicle is added to driven list
-                drivenVehicles.Add(v.Handle, new VehicleData(0, getTimestamp(), v.Model.Hash, v.DisplayName));
+                drivenVehicles.Add(v.Handle, new VehicleData(v, 0, getTimestamp(), v.Model.Hash, v.DisplayName));
                 v.IsPersistent = true;
                 UI.Notify("Added unsaved Vehicle [" + v.DisplayName + "](" + drivenVehicles.Count + ")");
             }
@@ -200,6 +225,9 @@ namespace CarPersistence
                     {
                         // Handle unsaved vehicles
                         ve.IsPersistent = false;
+                        VehicleData blipdel = null;
+                        drivenVehicles.TryGetValue(handle, out tmp);
+                        blipdel.b.Remove();
                         UI.Notify("Removed unsaved Vehicle [" + ve.DisplayName + "]");
                         break;
                     }
@@ -235,41 +263,56 @@ namespace CarPersistence
 
         private void updateBlips()
         {
-            clearBlips();
-            
-            foreach(KeyValuePair<int, VehicleData> entry in drivenVehicles)
+
+            Blip b = null;
+            foreach (KeyValuePair<int, VehicleData> entry in drivenVehicles)
             {
-                Vehicle v = findVehicleByHandle(entry.Key);
-                if (v == null)
+                if (entry.Value.b == null)
                 {
-                    continue;
+                    b = World.CreateBlip(entry.Value.v.Position);
+                    entry.Value.b = b;
+                    b.Color = BlipColor.Red;
+                    //b.Sprite = BlipSprite.PersonalVehicleCar;
+                    b.Scale = 0.8f;
+                    // FIND OUT HOW TO DO COLORED VEHICLE SPRITES
+                    //b.Color = BlipColor.Red;
                 }
-                Blip b = World.CreateBlip(v.Position);
-                b.Color = BlipColor.Red;
-                blips.AddLast(b);
+                entry.Value.b.Position = entry.Value.v.Position;
             }
             foreach (KeyValuePair<int, VehicleData> entry in savedVehicles)
             {
-                Vehicle v = findVehicleByHandle(entry.Key);
-                if (v == null)
+                if (entry.Value.b == null)
                 {
-                    continue;
-                } 
-                Blip b = World.CreateBlip(v.Position);
-                b.Color = BlipColor.Green;
-                blips.AddLast(b);
+                    b = World.CreateBlip(entry.Value.v.Position);
+                    entry.Value.b = b;
+                    b.Color = BlipColor.Green;
+                    //b.Sprite = BlipSprite.PersonalVehicleCar;
+                    b.Scale = 0.8f;
+                }
+                entry.Value.b.Position = entry.Value.v.Position;
             }
 
         }
 
         private void clearBlips()
         {
-            foreach (Blip b in blips)
+            foreach (KeyValuePair<int, VehicleData> entry in drivenVehicles)
             {
-                b.Remove();
+                if (entry.Value.b != null)
+                {
+                    entry.Value.b.Remove();
+                }
+            }
+            foreach (KeyValuePair<int, VehicleData> entry in savedVehicles)
+            {
+                if (entry.Value.b != null)
+                {
+                    entry.Value.b.Remove();
+                }
             }
         }
 
+        // this may cause bad performance if called from inside a loop
         private Vehicle findVehicleByHandle(int handle)
         {
             foreach(Vehicle v in World.GetAllVehicles())
