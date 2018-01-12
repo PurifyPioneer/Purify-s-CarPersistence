@@ -63,7 +63,7 @@ namespace CarPersistence
         {
             // If limit is exceeded oldest vehicles will be removed
             cleanUpDrivenVehicles();
-            updateBlips();
+            //updateBlips();
 
             // Logic to check if player is in a vehicle and if this vehicle is known to the system
             if(player.IsInVehicle())
